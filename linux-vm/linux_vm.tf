@@ -1,19 +1,27 @@
+module "rg" {
+  source = "../rg"
+}
+
+module "network" {
+  source = "../network"
+}
+
 resource "azurerm_network_interface" "nic" {
   name                = "nic"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = module.rg.rg_location
+  resource_group_name = module.rg.rg_name
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.private.id
+    subnet_id                     = module.network.private_subnet_id
     private_ip_address_allocation = "Dynamic"
   }
 }
 
 resource "azurerm_linux_virtual_machine" "linux-vm" {
   name                = "linuxVM"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = module.rg.rg_name
+  location            = module.rg.rg_location
   size                = "Standard_B1s"
   admin_username      = "azureuser"
   network_interface_ids = [
